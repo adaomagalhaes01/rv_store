@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@theme {
+  --font-outfit: "Outfit", sans-serif;
+  --color-primary: #ff8fa3; /* Voltando para o rosa suave */
+  --color-secondary: #fff0f3;
+  --color-accent: #ff4d6d;
+  --color-neutral-light: #f8f9fa;
+  --color-neutral-dark: #343a40;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+}
+
+@layer base {
+  :root {
+    --primary: #ff8fa3;
+    --primary-foreground: #ffffff;
+    --secondary: #fff0f3;
+    --secondary-foreground: #ff4d6d;
+    --accent: #ff4d6d;
+    --accent-foreground: #ffffff;
+    --background: #ffffff;
+    --foreground: #343a40;
+    --card: #ffffff;
+    --card-foreground: #343a40;
+    --border: #e9ecef;
+    --input: #e9ecef;
+    --ring: #ff8fa3;
+  }
+
+  * {
+    border-color: var(--border);
+    font-family: "Outfit", sans-serif;
+    font-weight: 300; /* Letra mais fina */
+  }
+
+  body {
+    @apply bg-white text-neutral-dark antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-normal tracking-tight;
+    font-weight: 500; /* Títulos um pouco mais visíveis mas não bold carregado */
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+  
+  .btn-primary {
+    @apply bg-primary hover:bg-accent text-white px-5 py-2.5 rounded-xl transition-all duration-300 transform active:scale-95 font-medium text-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary hover:bg-primary/20 text-accent px-5 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm;
+  }
+}
+
+/* Custom Swiper Styles */
+.swiper-pagination-bullet-active {
+  background: #ff8fa3 !important;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #ff8fa3;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ff4d6d;
+}
