@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import Home from '../pages/Home';
 import Category from '../pages/Category';
@@ -21,7 +21,11 @@ import Users from '../dashboard/pages/Users';
 import Banners from '../dashboard/pages/Banners';
 import Settings from '../dashboard/pages/Settings';
 
+import useUserStore from '../context/useUserStore';
+
 const AppRouter = () => {
+  const { isAuthenticated } = useUserStore();
+
   return (
     <Router>
       <Routes>
@@ -31,7 +35,10 @@ const AppRouter = () => {
           <Route path="category/:id" element={<Category />} />
           <Route path="product/:id" element={<ProductDetails />} />
           <Route path="cart" element={<Cart />} />
-          <Route path="checkout" element={<Checkout />} />
+          <Route 
+            path="checkout" 
+            element={isAuthenticated ? <Checkout /> : <Navigate to="/" replace />} 
+          />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="promotions" element={<Promotions />} />

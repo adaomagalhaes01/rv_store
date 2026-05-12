@@ -1,10 +1,25 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, ArrowRight, ShieldCheck, Truck } from 'lucide-react';
 import useCartStore from '../context/useCartStore';
+import useUserStore from '../context/useUserStore';
+import AuthModal from '../components/AuthModal';
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, getCartTotal } = useCartStore();
+  const { isAuthenticated } = useUserStore();
+  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCheckoutClick = (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+    } else {
+      navigate('/checkout');
+    }
+  };
 
   if (cart.length === 0) {
     return (
@@ -133,10 +148,13 @@ const Cart = () => {
                   </button>
                 </div>
 
-                <Link to="/checkout" className="btn-primary w-full flex items-center justify-center space-x-3 py-5 mt-6 shadow-xl">
+                <button 
+                  onClick={handleCheckoutClick}
+                  className="btn-primary w-full flex items-center justify-center space-x-3 py-5 mt-6 shadow-xl"
+                >
                   <span className="text-lg">Ir para Checkout</span>
                   <ArrowRight size={22} />
-                </Link>
+                </button>
               </div>
 
               <div className="mt-10 space-y-4 border-t pt-10">
@@ -153,6 +171,11 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+      />
     </div>
   );
 };

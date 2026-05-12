@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, ShoppingBag, User, Menu, X, Heart } from 'lucide-react';
+import { Search, ShoppingBag, User, Menu, X, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useCartStore from '../context/useCartStore';
+import useUserStore from '../context/useUserStore';
 import SearchModal from './SearchModal';
 
 const Header = () => {
@@ -10,6 +11,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { toggleCart, getCartCount } = useCartStore();
+  const { isAuthenticated, user } = useUserStore();
   const location = useLocation();
 
   useEffect(() => {
@@ -20,7 +22,6 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
@@ -41,7 +42,6 @@ const Header = () => {
     >
       <div className={`${isScrolled ? 'py-3' : 'py-5'} transition-all duration-300`}>
         <div className="container flex items-center justify-between">
-          {/* Mobile Menu Button */}
           <button 
             className="lg:hidden p-2 text-neutral-dark"
             onClick={() => setIsMobileMenuOpen(true)}
@@ -49,12 +49,10 @@ const Header = () => {
             <Menu size={24} />
           </button>
 
-          {/* Logo */}
           <Link to="/" className="text-2xl font-medium tracking-tighter text-neutral-dark">
             RV<span className="text-primary">_Store</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-10">
             {navLinks.map((link) => (
               <Link 
@@ -69,24 +67,46 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <button 
               onClick={() => setIsSearchOpen(true)}
               className="hidden sm:block p-2 text-neutral-dark/80 hover:text-primary transition-colors duration-300"
             >
               <Search size={20} />
             </button>
-            <button className="hidden sm:block p-2 text-neutral-dark/80 hover:text-primary transition-colors duration-300">
-              <User size={20} />
-            </button>
+
+            <Link 
+              to="/admin" 
+              className="hidden md:flex items-center space-x-1 p-2 text-neutral-dark/80 hover:text-primary transition-colors duration-300"
+              title="Painel Admin"
+            >
+              <LayoutDashboard size={20} />
+            </Link>
+
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-secondary rounded-full border border-primary/10">
+                <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-[10px] font-bold">
+                  {user?.name?.charAt(0) || 'U'}
+                </div>
+                <span className="hidden lg:block text-[11px] font-bold text-neutral-dark">{user.name}</span>
+              </div>
+            ) : (
+              <Link 
+                to="/admin/login" 
+                className="p-2 text-neutral-dark/80 hover:text-primary transition-colors duration-300"
+                title="Entrar"
+              >
+                <User size={20} />
+              </Link>
+            )}
+
             <button 
               onClick={toggleCart}
               className="p-2 text-neutral-dark/80 hover:text-primary transition-colors duration-300 relative"
             >
               <ShoppingBag size={20} />
               {getCartCount() > 0 && (
-                <span className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
                   {getCartCount()}
                 </span>
               )}
@@ -95,7 +115,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -132,6 +151,12 @@ const Header = () => {
                     {link.name}
                   </Link>
                 ))}
+                <div className="pt-6 border-t">
+                  <Link to="/admin" className="flex items-center space-x-3 text-lg font-bold text-neutral-dark/60">
+                    <LayoutDashboard size={24} />
+                    <span>Painel Administrativo</span>
+                  </Link>
+                </div>
               </nav>
             </motion.div>
           </>
