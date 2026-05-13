@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
     { icon: ShoppingBag, label: 'Produtos', path: '/admin/products', badge: stats.activeProducts },
     { icon: Package, label: 'Pedidos', path: '/admin/orders', badge: stats.pendingOrders },
-    { icon: Users, label: 'Clientes', path: '/admin/users' },
+    { icon: Users, label: 'Usuários', path: '/admin/users' },
     { icon: ImageIcon, label: 'Banners', path: '/admin/banners' },
   ];
 

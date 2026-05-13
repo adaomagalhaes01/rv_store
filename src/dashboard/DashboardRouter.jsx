@@ -3,6 +3,9 @@ import DashboardLayout from './layouts/DashboardLayout';
 import Overview from './pages/Overview';
 import Products from './pages/Products';
 import Orders from './pages/Orders';
+import Users from './pages/Users';
+import Banners from './pages/Banners';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -23,9 +26,9 @@ const DashboardRouter = () => {
         <Route index element={<Overview />} />
         <Route path="products" element={<Products />} />
         <Route path="orders" element={<Orders />} />
-        <Route path="users" element={<MockPage title="Gestão de Usuários" />} />
-        <Route path="banners" element={<MockPage title="Gerenciar Banners" />} />
-        <Route path="settings" element={<MockPage title="Configurações" />} />
+        <Route path="users" element={<Users />} />
+        <Route path="banners" element={<Banners />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>
