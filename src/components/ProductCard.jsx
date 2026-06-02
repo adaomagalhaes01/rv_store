@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Star } from 'lucide-react';
-import { motion } from 'framer-motion';
+
 import useCartStore from '../context/useCartStore';
 import toast from 'react-hot-toast';
 
@@ -23,11 +23,7 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
+    <div 
       className="group relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -93,7 +89,7 @@ const ProductCard = ({ product }) => {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

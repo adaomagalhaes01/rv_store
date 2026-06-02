@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   TrendingUp, 
@@ -99,11 +99,8 @@ const Overview = () => {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         {statCards.map((card, index) => (
-          <motion.div 
+          <div 
             key={card.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.08 }}
             onClick={() => navigate(card.path)}
             className="rounded-2xl p-6 text-white relative overflow-hidden cursor-pointer hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
             style={{ background: card.gradient }}
@@ -125,7 +122,7 @@ const Overview = () => {
                 <span>{card.trend}</span>
               </span>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -164,12 +161,10 @@ const Overview = () => {
                         Kz {val * 1000}
                       </div>
                     </div>
-                    <motion.div 
-                      initial={{ height: 0 }}
-                      animate={{ height: `${(val / 120) * 100}%` }}
-                      transition={{ delay: i * 0.05, duration: 0.8, ease: "easeOut" }}
+                    <div 
                       className="w-full max-w-[40px] rounded-t-lg transition-all duration-300 group-hover:opacity-80"
                       style={{ 
+                        height: `${(val / 120) * 100}%`,
                         background: i % 2 === 0 ? 'linear-gradient(to top, #ff8fa3, #ff4d6d)' : 'linear-gradient(to top, #fecdd3, #fb7185)' 
                       }}
                     />
@@ -193,18 +188,13 @@ const Overview = () => {
                   ))}
 
                   {/* Area */}
-                  <motion.path
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                  <path
                     d={`M 0,200 ${chartData.map((val, i) => `L ${(i * 1000) / 11},${200 - (val / 120) * 200}`).join(' ')} L 1000,200 Z`}
                     fill="url(#chartGradient)"
                   />
 
                   {/* Line */}
-                  <motion.path
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                  <path
                     d={`M 0,${200 - (chartData[0] / 120) * 200} ${chartData.map((val, i) => `L ${(i * 1000) / 11},${200 - (val / 120) * 200}`).join(' ')}`}
                     fill="none"
                     stroke="#ff4d6d"
@@ -215,13 +205,11 @@ const Overview = () => {
 
                   {/* Dots */}
                   {chartData.map((val, i) => (
-                    <motion.circle
+                    <circle
                       key={i}
-                      initial={{ r: 0 }}
-                      animate={{ r: 4 }}
-                      transition={{ delay: i * 0.1 }}
                       cx={(i * 1000) / 11}
                       cy={200 - (val / 120) * 200}
+                      r={4}
                       fill="white"
                       stroke="#ff4d6d"
                       strokeWidth="2"

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 import { ArrowRight, ShoppingBag, Truck, ShieldCheck, Zap, Mail, Send } from 'lucide-react';
@@ -36,10 +36,7 @@ const Home = () => {
         >
           <SwiperSlide>
             <div className="relative h-full w-full flex items-center justify-center">
-              <motion.div 
-                initial={{ scale: 1.2 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 10, ease: "linear" }}
+              <div 
                 className="absolute inset-0 w-full h-full"
               >
                 <img 
@@ -47,51 +44,36 @@ const Home = () => {
                   className="w-full h-full object-cover" 
                   alt="Banner 1"
                 />
-              </motion.div>
+              </div>
               <div className="absolute inset-0 bg-white/10" />
               <div className="container relative h-full flex flex-col justify-center items-center text-center text-neutral-dark">
-                <motion.span 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <span 
                   className="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-primary text-primary bg-primary/10"
                 >
                   Coleção Exclusiva
-                </motion.span>
-                <motion.h1 
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.8 }}
+                </span>
+                <h1 
                   className="text-5xl md:text-8xl font-medium leading-tight mb-6 max-w-4xl"
                 >
                   A Nova Era da <span className="text-primary italic font-light">Elegância.</span>
-                </motion.h1>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.8 }}
+                </h1>
+                <p 
                   className="text-lg text-neutral-dark/60 mb-8 max-w-lg"
                 >
                   Descubra peças únicas que definem o seu estilo. Qualidade premium com curadoria exclusiva RV_Store.
-                </motion.p>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                >
+                </p>
+                <div>
                   <Link to="/category/feminino" className="btn-primary flex items-center space-x-2 rounded-[2px]">
                     <span>Explorar Agora</span>
                     <ArrowRight size={18} />
                   </Link>
-                </motion.div>
+                </div>
               </div>
             </div>
           </SwiperSlide>
           <SwiperSlide>
             <div className="relative h-full w-full flex items-center justify-center">
-              <motion.div 
-                initial={{ scale: 1 }}
-                animate={{ scale: 1.2 }}
-                transition={{ duration: 10, ease: "linear" }}
+              <div 
                 className="absolute inset-0 w-full h-full"
               >
                 <img 
@@ -99,34 +81,25 @@ const Home = () => {
                   className="w-full h-full object-cover" 
                   alt="Banner 2"
                 />
-              </motion.div>
+              </div>
               <div className="absolute inset-0 bg-white/10" />
               <div className="container relative h-full flex flex-col justify-center items-center text-center text-neutral-dark">
-                <motion.span 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <span 
                   className="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-primary text-primary bg-primary/10"
                 >
                   Essentials
-                </motion.span>
-                <motion.h1 
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
+                </span>
+                <h1 
                   className="text-5xl md:text-8xl font-medium leading-tight mb-6 max-w-4xl"
                 >
                   Estilo que <span className="text-primary italic font-light">Inspira.</span>
-                </motion.h1>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                >
+                </h1>
+                <div>
                   <Link to="/category/masculino" className="btn-primary flex items-center space-x-2 rounded-[2px]">
                     <span>Ver Coleção</span>
                     <ArrowRight size={18} />
                   </Link>
-                </motion.div>
+                </div>
               </div>
             </div>
           </SwiperSlide>
@@ -142,12 +115,8 @@ const Home = () => {
             { icon: <Zap size={24} />, title: 'Qualidade Premium', desc: 'Produtos originais' },
             { icon: <ShoppingBag size={24} />, title: 'Devolução Fácil', desc: '7 dias garantidos' },
           ].map((feature, idx) => (
-            <motion.div 
+            <div 
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              viewport={{ once: true }}
               className="flex items-center space-x-4 p-4 rounded-2xl border border-neutral-light hover:border-primary/30 transition-colors bg-white shadow-sm"
             >
               <div className="text-primary">{feature.icon}</div>
@@ -155,7 +124,7 @@ const Home = () => {
                 <h3 className="font-bold text-xs">{feature.title}</h3>
                 <p className="text-[10px] text-neutral-dark/50">{feature.desc}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
@@ -175,13 +144,8 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((cat, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -5 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
                 className="group relative h-80 rounded-2xl overflow-hidden bg-neutral-light cursor-pointer shadow-sm"
               >
                 <img 
@@ -199,7 +163,7 @@ const Home = () => {
                     </Link>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

@@ -34,10 +34,17 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [newProduct, setNewProduct] = useState({
-    name: '', category: 'Femininas', price: '', stock: '', image: ''
+    name: '', category: 'Femininas', price: '', stock: '', image: '',
+    description: '', sizes: { S: 0, M: 0, L: 0, XL: 0 }, discountCoupon: '', colors: ''
   });
 
   const categories = ['Todas', 'Femininas', 'Masculinas', 'Cosméticos', 'Calçados'];
+
+  const getSizeOptions = (category) => {
+    if (category === 'Calçados') return ['37', '38', '39', '40', '41', '42', '43', '44'];
+    if (category === 'Cosméticos') return ['30ml', '50ml', '100ml', '200ml'];
+    return ['S', 'M', 'L', 'XL'];
+  };
 
   const handleImageChange = (e, isEdit = false) => {
     const file = e.target.files[0];
@@ -75,7 +82,7 @@ const Products = () => {
       image: newProduct.image || '/assets/perfume-1.png'
     });
     setIsModalOpen(false);
-    setNewProduct({ name: '', category: 'Femininas', price: '', stock: '', image: '' });
+    setNewProduct({ name: '', category: 'Femininas', price: '', stock: '', image: '', description: '', sizes: { S: 0, M: 0, L: 0, XL: 0 }, discountCoupon: '', colors: '' });
     toast.success('Produto adicionado com sucesso!');
   };
 
@@ -102,7 +109,13 @@ const Products = () => {
   };
 
   const openEditModal = (product) => {
-    setSelectedProduct({ ...product });
+    setSelectedProduct({ 
+      ...product,
+      description: product.description || '',
+      sizes: product.sizes || { S: 0, M: 0, L: 0, XL: 0 },
+      discountCoupon: product.discountCoupon || '',
+      colors: product.colors || ''
+    });
     setIsEditModalOpen(true);
   };
 
@@ -282,7 +295,7 @@ const Products = () => {
                 </button>
               </div>
               
-              <form onSubmit={handleAddProduct} className="p-6 space-y-5">
+              <form onSubmit={handleAddProduct} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto custom-scrollbar">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-gray-500">Nome do Produto</label>
                   <input 
@@ -293,12 +306,28 @@ const Products = () => {
                     className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
                   />
                 </div>
+                
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500">Descrição</label>
+                  <textarea 
+                    value={newProduct.description}
+                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    placeholder="Breve descrição do produto..."
+                    className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none resize-none h-20"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-500">Categoria</label>
                     <select 
                       value={newProduct.category}
-                      onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                      onChange={(e) => setNewProduct({
+                        ...newProduct, 
+                        category: e.target.value,
+                        sizes: {},
+                        stock: 0
+                      })}
                       className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
                     >
                       {categories.filter(c => c !== 'Todas').map(c => (
@@ -317,9 +346,56 @@ const Products = () => {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500">Tamanhos/Opções e Quantidades</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {getSizeOptions(newProduct.category).map((size) => (
+                      <div key={size} className="flex flex-col space-y-1">
+                        <span className="text-[10px] text-center font-bold text-gray-400">{size}</span>
+                        <input 
+                          type="number"
+                          value={newProduct.sizes?.[size] || ''}
+                          onChange={(e) => {
+                            const newSizes = { ...newProduct.sizes, [size]: Number(e.target.value) };
+                            setNewProduct({
+                              ...newProduct, 
+                              sizes: newSizes,
+                              stock: Object.values(newSizes).reduce((a,b) => a+b, 0)
+                            });
+                          }}
+                          placeholder="0"
+                          className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-2 py-2 text-center text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500">Cores Disponíveis</label>
+                  <input 
+                    type="text"
+                    value={newProduct.colors}
+                    onChange={(e) => setNewProduct({...newProduct, colors: e.target.value})}
+                    placeholder="Ex: Preto, Branco, Azul (separadas por vírgula)"
+                    className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Estoque</label>
+                    <label className="text-xs font-semibold text-gray-500">Cupom de Desconto</label>
+                    <input 
+                      type="text"
+                      value={newProduct.discountCoupon}
+                      onChange={(e) => setNewProduct({...newProduct, discountCoupon: e.target.value})}
+                      placeholder="Ex: PROMO20"
+                      className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none uppercase"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-500">Estoque Total</label>
                     <input 
                       type="number"
                       value={newProduct.stock}
@@ -328,41 +404,42 @@ const Products = () => {
                       className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Imagem</label>
-                    <input 
-                      type="file"
-                      ref={fileInputRef}
-                      className="hidden"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange(e)}
-                    />
-                    <div 
-                      onClick={() => fileInputRef.current?.click()}
-                      className={`w-full h-[46px] bg-[#f8f9fc] border-2 border-dashed ${newProduct.image ? 'border-primary/30 bg-primary/5' : 'border-gray-200'} rounded-xl flex items-center justify-center cursor-pointer hover:border-primary/30 transition-all overflow-hidden`}
-                    >
-                      {newProduct.image ? (
-                        <div className="flex items-center space-x-2 w-full px-4">
-                          <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-primary/20">
-                            <img src={newProduct.image} alt="" className="w-full h-full object-cover" />
-                          </div>
-                          <span className="text-[10px] text-primary font-bold uppercase truncate">Imagem Carregada</span>
-                          <X 
-                            size={14} 
-                            className="text-primary/40 hover:text-primary ml-auto shrink-0" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setNewProduct({ ...newProduct, image: '' });
-                            }} 
-                          />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500">Imagem</label>
+                  <input 
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleImageChange(e)}
+                  />
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`w-full h-[46px] bg-[#f8f9fc] border-2 border-dashed ${newProduct.image ? 'border-primary/30 bg-primary/5' : 'border-gray-200'} rounded-xl flex items-center justify-center cursor-pointer hover:border-primary/30 transition-all overflow-hidden`}
+                  >
+                    {newProduct.image ? (
+                      <div className="flex items-center space-x-2 w-full px-4">
+                        <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-primary/20">
+                          <img src={newProduct.image} alt="" className="w-full h-full object-cover" />
                         </div>
-                      ) : (
-                        <div className="flex items-center text-gray-400 space-x-2">
-                          <UploadCloud size={16} />
-                          <span className="text-xs font-medium">Selecionar Imagem</span>
-                        </div>
-                      )}
-                    </div>
+                        <span className="text-[10px] text-primary font-bold uppercase truncate">Imagem Carregada</span>
+                        <X 
+                          size={14} 
+                          className="text-primary/40 hover:text-primary ml-auto shrink-0" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setNewProduct({ ...newProduct, image: '' });
+                          }} 
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-gray-400 space-x-2">
+                        <UploadCloud size={16} />
+                        <span className="text-xs font-medium">Selecionar Imagem</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -415,7 +492,7 @@ const Products = () => {
                 </button>
               </div>
               
-              <form onSubmit={handleEditProduct} className="p-6 space-y-5">
+              <form onSubmit={handleEditProduct} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto custom-scrollbar">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-gray-500">Nome do Produto</label>
                   <input 
@@ -425,12 +502,28 @@ const Products = () => {
                     className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
                   />
                 </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500">Descrição</label>
+                  <textarea 
+                    value={selectedProduct.description}
+                    onChange={(e) => setSelectedProduct({...selectedProduct, description: e.target.value})}
+                    placeholder="Breve descrição do produto..."
+                    className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none resize-none h-20"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-500">Categoria</label>
                     <select 
                       value={selectedProduct.category}
-                      onChange={(e) => setSelectedProduct({...selectedProduct, category: e.target.value})}
+                      onChange={(e) => setSelectedProduct({
+                        ...selectedProduct, 
+                        category: e.target.value,
+                        sizes: {},
+                        stock: 0
+                      })}
                       className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
                     >
                       {categories.filter(c => c !== 'Todas').map(c => (
@@ -448,9 +541,56 @@ const Products = () => {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500">Tamanhos/Opções e Quantidades</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {getSizeOptions(selectedProduct.category).map((size) => (
+                      <div key={size} className="flex flex-col space-y-1">
+                        <span className="text-[10px] text-center font-bold text-gray-400">{size}</span>
+                        <input 
+                          type="number"
+                          value={selectedProduct.sizes?.[size] || ''}
+                          onChange={(e) => {
+                            const newSizes = { ...selectedProduct.sizes, [size]: Number(e.target.value) };
+                            setSelectedProduct({
+                              ...selectedProduct, 
+                              sizes: newSizes,
+                              stock: Object.values(newSizes).reduce((a,b) => a+b, 0)
+                            });
+                          }}
+                          placeholder="0"
+                          className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-2 py-2 text-center text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500">Cores Disponíveis</label>
+                  <input 
+                    type="text"
+                    value={selectedProduct.colors}
+                    onChange={(e) => setSelectedProduct({...selectedProduct, colors: e.target.value})}
+                    placeholder="Ex: Preto, Branco, Azul (separadas por vírgula)"
+                    className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Estoque</label>
+                    <label className="text-xs font-semibold text-gray-500">Cupom de Desconto</label>
+                    <input 
+                      type="text"
+                      value={selectedProduct.discountCoupon}
+                      onChange={(e) => setSelectedProduct({...selectedProduct, discountCoupon: e.target.value})}
+                      placeholder="Ex: PROMO20"
+                      className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none uppercase"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-500">Estoque Total</label>
                     <input 
                       type="number"
                       value={selectedProduct.stock}
@@ -458,28 +598,29 @@ const Products = () => {
                       className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Imagem</label>
-                    <input 
-                      type="file"
-                      ref={editFileInputRef}
-                      className="hidden"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange(e, true)}
-                    />
-                    <div 
-                      onClick={() => editFileInputRef.current?.click()}
-                      className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl p-3 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-all"
-                    >
-                      <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 shrink-0">
-                        <img src={selectedProduct.image} alt="" className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-600 font-bold">Trocar Imagem</span>
-                        <span className="text-[10px] text-gray-400">Clique para selecionar</span>
-                      </div>
-                      <ImageIcon className="text-primary/40 ml-auto shrink-0" size={16} />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-gray-500">Imagem</label>
+                  <input 
+                    type="file"
+                    ref={editFileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleImageChange(e, true)}
+                  />
+                  <div 
+                    onClick={() => editFileInputRef.current?.click()}
+                    className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl p-3 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-all"
+                  >
+                    <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+                      <img src={selectedProduct.image} alt="" className="w-full h-full object-cover" />
                     </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-600 font-bold">Trocar Imagem</span>
+                      <span className="text-[10px] text-gray-400">Clique para selecionar</span>
+                    </div>
+                    <ImageIcon className="text-primary/40 ml-auto shrink-0" size={16} />
                   </div>
                 </div>
 
@@ -534,7 +675,7 @@ const Products = () => {
               </div>
 
               {/* Product Info Section */}
-              <div className="w-full md:w-1/2 p-8 flex flex-col">
+              <div className="w-full md:w-1/2 p-8 flex flex-col max-h-[80vh] overflow-y-auto custom-scrollbar">
                 <div className="flex items-center justify-between mb-2">
                   <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider rounded-full">
                     {selectedProduct.category}
@@ -547,9 +688,47 @@ const Products = () => {
                 <h2 className="text-2xl font-bold text-gray-800 mb-1">{selectedProduct.name}</h2>
                 <p className="text-gray-400 text-xs font-medium mb-6">ID: #{selectedProduct.id}</p>
 
-                <div className="text-3xl font-black text-gray-800 mb-8">
+                <div className="text-3xl font-black text-gray-800 mb-6">
                   {selectedProduct.price.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}
                 </div>
+
+                {selectedProduct.description && (
+                  <div className="mb-5">
+                    <h3 className="text-xs font-bold text-gray-800 uppercase mb-1">Descrição</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">{selectedProduct.description}</p>
+                  </div>
+                )}
+
+                {(selectedProduct.colors || selectedProduct.discountCoupon) && (
+                  <div className="grid grid-cols-2 gap-4 mb-5">
+                    {selectedProduct.colors && (
+                      <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <h3 className="text-[10px] font-bold text-gray-400 uppercase mb-1">Cores Disponíveis</h3>
+                        <p className="text-xs font-semibold text-gray-700">{selectedProduct.colors}</p>
+                      </div>
+                    )}
+                    {selectedProduct.discountCoupon && (
+                      <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <h3 className="text-[10px] font-bold text-gray-400 uppercase mb-1">Cupom de Desconto</h3>
+                        <p className="text-xs font-semibold text-primary">{selectedProduct.discountCoupon}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {selectedProduct.sizes && Object.keys(selectedProduct.sizes).length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-xs font-bold text-gray-800 uppercase mb-2">Opções e Quantidades</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(selectedProduct.sizes).map(([size, qty]) => (
+                        <div key={size} className="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 min-w-[3rem]">
+                          <span className="text-xs font-bold text-gray-700">{size}</span>
+                          <span className="text-[10px] text-gray-400">{qty} und.</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
