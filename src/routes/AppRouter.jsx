@@ -8,6 +8,7 @@ import Checkout from '../pages/Checkout';
 import About from '../pages/About';
 import Contact from '../pages/Contact';
 import Promotions from '../pages/Promotions';
+import Auth from '../pages/Auth';
 import NotFound from '../pages/NotFound';
 
 // Dashboard imports
@@ -42,6 +43,7 @@ const AppRouter = () => {
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="promotions" element={<Promotions />} />
+          <Route path="auth" element={<Auth />} />
         </Route>
 
         {/* ======= Painel Administrativo ======= */}

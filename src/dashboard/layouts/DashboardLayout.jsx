@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { Menu, Bell, Search, ChevronDown, ShoppingCart, Users, Package, CheckCircle2, Clock, X } from 'lucide-react';
@@ -8,7 +8,17 @@ import useAdminStore from '../stores/useAdminStore';
 const DashboardLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { isAuthenticated, user } = useAdminStore();
+  const { isAuthenticated, user, loadProducts, loadOrders, loadStats, loadUsers, loadBanners } = useAdminStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadProducts();
+      loadOrders();
+      loadStats();
+      loadUsers();
+      loadBanners();
+    }
+  }, [isAuthenticated]);
 
   const notifications = [
     { id: 1, text: 'Novo pedido recebido de Maria Silva', type: 'order', time: '5 min atrás', icon: ShoppingCart, color: '#ff4d6d' },

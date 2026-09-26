@@ -1,11 +1,16 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
-import productsData from '../data/products.json';
+import { fetchOnSale } from '../lib/products';
 import { Sparkles, Timer, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Promotions = () => {
-  const saleProducts = productsData.filter(p => p.onSale);
+  const [saleProducts, setSaleProducts] = useState([]);
+
+  useEffect(() => {
+    fetchOnSale().then(setSaleProducts).catch(() => setSaleProducts([]));
+  }, []);
 
   return (
     <div className="pt-32 pb-20">

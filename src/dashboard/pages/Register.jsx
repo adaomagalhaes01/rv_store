@@ -23,7 +23,7 @@ const Register = () => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
@@ -36,14 +36,21 @@ const Register = () => {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      register({ name: formData.name, email: formData.email });
-      setLoading(false);
-      toast.success('Conta criada com sucesso! Faça login.', {
+    const { ok, error } = await register({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    });
+    setLoading(false);
+
+    if (ok) {
+      toast.success('Conta criada! Já pode entrar.', {
         style: { borderRadius: '12px', background: '#333', color: '#fff' },
       });
       navigate('/admin/login');
-    }, 1800);
+    } else {
+      toast.error(error?.message || 'Não foi possível criar a conta.');
+    }
   };
 
   return (

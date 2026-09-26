@@ -97,7 +97,7 @@ const Settings = () => {
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                     <input 
                       type="email" 
-                      defaultValue="admin@rvstore.com"
+                      defaultValue={user?.email || 'admin@rvstore.com'}
                       className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none" 
                     />
                   </div>

@@ -14,23 +14,21 @@ const Login = () => {
   const navigate = useNavigate();
   const login = useAdminStore(state => state.login);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    setTimeout(() => {
-      const success = login({ email, password });
-      setLoading(false);
-      
-      if (success) {
-        toast.success('Bem-vindo de volta, Admin!', {
-          style: { borderRadius: '12px', background: '#333', color: '#fff' },
-        });
-        navigate('/admin');
-      } else {
-        toast.error('Credenciais inválidas. Tente admin@rvstore.com / admin123');
-      }
-    }, 1500);
+    const { ok, error } = await login({ email, password });
+    setLoading(false);
+
+    if (ok) {
+      toast.success('Bem-vindo de volta, Admin!', {
+        style: { borderRadius: '12px', background: '#333', color: '#fff' },
+      });
+      navigate('/admin');
+    } else {
+      toast.error(error?.message || 'Credenciais inválidas.');
+    }
   };
 
   return (

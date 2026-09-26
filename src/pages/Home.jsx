@@ -2,9 +2,11 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 import { ArrowRight, ShoppingBag, Truck, ShieldCheck, Zap, Mail, Send } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import productsData from '../data/products.json';
+import { fetchFeatured, fetchOnSale } from '../lib/products';
+import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
 // Import Swiper styles
@@ -13,8 +15,37 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
 const Home = () => {
-  const featuredProducts = productsData.filter(p => p.isFeatured).slice(0, 4);
-  const promotionProducts = productsData.filter(p => p.onSale).slice(0, 4);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [promotionProducts, setPromotionProducts] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([fetchFeatured(4).catch(() => []), fetchOnSale().catch(() => [])]).then(([featured, sale]) => {
+      if (!active) return;
+      setFeaturedProducts(featured.slice(0, 4));
+      setPromotionProducts(sale.slice(0, 4));
+    });
+    return () => { active = false; };
+  }, []);
+
+  const subscribeNewsletter = async (e) => {
+    e.preventDefault();
+    const email = e.target.elements.email.value;
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .insert({ email });
+    if (error) {
+      const m = (error.message || '').toLowerCase();
+      if (m.includes('duplicate') || m.includes('already')) {
+        toast.success('Este email já está registado na nossa newsletter!');
+      } else {
+        toast.error('Não foi possível fazer a inscrição. Tente novamente.');
+      }
+    } else {
+      toast.success('Inscrição realizada! Receberá as nossas novidades.');
+    }
+    e.target.reset();
+  };
 
   const categories = [
     { name: 'Masculino', image: '/assets/camisa-azul-1.png', path: '/category/masculino' },
@@ -221,16 +252,13 @@ const Home = () => {
             </div>
             <div className="md:w-1/2 w-full">
               <form 
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  toast.success('Inscrição realizada!');
-                  e.target.reset();
-                }}
+                onSubmit={subscribeNewsletter}
                 className="space-y-4"
               >
                 <div className="relative">
                   <input 
                     type="email" 
+                    name="email"
                     required
                     placeholder="Seu email" 
                     className="w-full bg-white border border-neutral-200 rounded-xl px-6 py-4 focus:ring-2 focus:ring-primary/10 transition-all text-sm"

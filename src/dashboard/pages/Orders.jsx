@@ -37,12 +37,12 @@ const Orders = () => {
     'Entregue': { bg: 'bg-primary/10', text: 'text-primary', dot: 'bg-primary', icon: Package }
   };
 
-  const handleStatusChange = (id, currentStatus) => {
+  const handleStatusChange = async (id, currentStatus) => {
     const statuses = ['Pendente', 'Pago', 'Enviado', 'Entregue'];
     const currentIndex = statuses.indexOf(currentStatus);
     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
-    updateOrderStatus(id, nextStatus);
-    toast.success(`Pedido ${id} → ${nextStatus}`);
+    await updateOrderStatus(id, nextStatus);
+    toast.success(`Pedido ${currentStatus} → ${nextStatus}`);
   };
 
   const filteredOrders = orders.filter(o => {
@@ -53,19 +53,11 @@ const Orders = () => {
   });
 
   const openOrderDetails = (order) => {
-    // Mock detailed data for the selected order
     const detailedOrder = {
       ...order,
-      email: 'cliente@exemplo.com',
-      phone: '923 456 789',
-      address: 'Rua Principal, 123, Luanda, Angola',
-      paymentMethod: 'Transferência Bancária',
-      items: [
-        { name: 'Vestido Rosa Premium', quantity: 1, price: 25000, image: '/assets/vestido-rosa-1.png' },
-        { name: 'Perfume Noir Edition', quantity: 1, price: 32000, image: '/assets/perfume-1.png' },
-      ],
-      subtotal: 57000,
-      shipping: 0,
+      subtotal: order.subtotal ?? order.total,
+      shipping: order.shipping ?? 0,
+      items: order.items || [],
     };
     setSelectedOrder(detailedOrder);
     setIsModalOpen(true);
@@ -164,7 +156,7 @@ const Orders = () => {
                     </td>
                     <td className="px-6 py-5">
                       <button 
-                        onClick={() => handleStatusChange(order.id, order.status)}
+                        onClick={() => handleStatusChange(order.dbId, order.status)}
                         className={`inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${sc.bg} ${sc.text} hover:brightness-95 transition-all shadow-sm shadow-black/5`}
                         title="Clique para avançar status"
                       >
@@ -387,7 +379,7 @@ const Orders = () => {
                     {['Pendente', 'Pago', 'Enviado', 'Entregue'].map(status => (
                       <button 
                         key={status}
-                        onClick={() => handleStatusChange(selectedOrder.id, status)}
+                        onClick={() => handleStatusChange(selectedOrder.dbId, status)}
                         className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tighter transition-all ${
                           selectedOrder.status === status 
                             ? 'bg-primary text-white shadow-md shadow-primary/20 scale-105' 

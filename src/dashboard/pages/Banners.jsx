@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -14,9 +14,12 @@ import {
   AlertCircle,
   ExternalLink
 } from 'lucide-react';
+import useAdminStore from '../stores/useAdminStore';
+import { uploadImage } from '../../lib/storage';
 import toast from 'react-hot-toast';
 
 const Banners = () => {
+  const { banners, loadBanners, addBanner, updateBanner, deleteBanner, toggleBanner } = useAdminStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -26,67 +29,77 @@ const Banners = () => {
   const fileInputRef = useRef(null);
   const editFileInputRef = useRef(null);
   
-  // Mock banners data
-  const [banners, setBanners] = useState([
-    { id: 1, title: 'Coleção de Verão', subtitle: 'Até 50% de Desconto', link: '/category/femininas', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070', active: true },
-    { id: 2, title: 'Nova Linha de Cosméticos', subtitle: 'Beleza Natural', link: '/category/cosmeticos', image: 'https://images.unsplash.com/photo-1596462502278-27bfac4033c8?q=80&w=2080', active: true },
-    { id: 3, title: 'Calçados Premium', subtitle: 'Estilo em cada passo', link: '/category/calcados', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2012', active: false },
-  ]);
-
   const [newBanner, setNewBanner] = useState({
     title: '', subtitle: '', link: '', image: '', active: true
   });
 
-  const handleImageChange = (e, isEdit = false) => {
+  useEffect(() => {
+    loadBanners();
+  }, [loadBanners]);
+
+  const handleImageChange = async (e, isEdit = false) => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
         toast.error('Por favor, selecione apenas arquivos de imagem.');
         return;
       }
-      const imageUrl = URL.createObjectURL(file);
-      if (isEdit) {
-        setSelectedBanner({ ...selectedBanner, image: imageUrl });
-      } else {
-        setNewBanner({ ...newBanner, image: imageUrl });
+      try {
+        const url = await uploadImage(file, 'banners');
+        if (isEdit) {
+          setSelectedBanner({ ...selectedBanner, image: url });
+        } else {
+          setNewBanner({ ...newBanner, image: url });
+        }
+        toast.success('Imagem carregada com sucesso!');
+      } catch {
+        toast.error('Não foi possível carregar a imagem.');
       }
-      toast.success('Imagem carregada com sucesso!');
     }
   };
 
-  const handleAddBanner = () => {
+  const handleAddBanner = async () => {
     if (!newBanner.title || !newBanner.image) {
       toast.error('Preencha o título e selecione uma imagem.');
       return;
     }
-    const bannerToAdd = {
-      ...newBanner,
-      id: Date.now()
-    };
-    setBanners([bannerToAdd, ...banners]);
+    const { ok, error } = await addBanner(newBanner);
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível adicionar o banner.');
+      return;
+    }
     setIsModalOpen(false);
     setNewBanner({ title: '', subtitle: '', link: '', image: '', active: true });
     toast.success('Banner adicionado com sucesso!');
   };
 
-  const handleEditBanner = () => {
+  const handleEditBanner = async () => {
     if (!selectedBanner.title || !selectedBanner.image) {
       toast.error('Preencha o título e selecione uma imagem.');
       return;
     }
-    setBanners(banners.map(b => b.id === selectedBanner.id ? selectedBanner : b));
+    const { ok, error } = await updateBanner(selectedBanner.id, selectedBanner);
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível atualizar o banner.');
+      return;
+    }
     setIsEditModalOpen(false);
     toast.success('Banner atualizado!');
   };
 
-  const confirmDelete = () => {
-    setBanners(banners.filter(b => b.id !== selectedBanner.id));
+  const confirmDelete = async () => {
+    const { ok, error } = await deleteBanner(selectedBanner.id);
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível remover o banner.');
+      return;
+    }
     setIsDeleteModalOpen(false);
     toast.success('Banner removido!');
   };
 
-  const toggleStatus = (id) => {
-    setBanners(banners.map(b => b.id === id ? { ...b, active: !b.active } : b));
+  const toggleStatus = async (id) => {
+    const banner = banners.find((b) => b.id === id);
+    await toggleBanner(id, banner?.active);
     toast.success('Status do banner atualizado.');
   };
 

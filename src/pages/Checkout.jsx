@@ -13,11 +13,14 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import useCartStore from '../context/useCartStore';
+import useUserStore from '../context/useUserStore';
+import { supabase } from '../lib/supabase';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const Checkout = () => {
   const { cart, getCartTotal, clearCart } = useCartStore();
+  const { user } = useUserStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1); // 1: Shipping, 2: Payment
@@ -36,12 +39,46 @@ const Checkout = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFinishPurchase = (e) => {
+  const handleFinishPurchase = async (e) => {
     if (e) e.preventDefault();
+
+    if (!user) {
+      toast.error('Faz login com a tua conta para confirmar a compra.');
+      navigate('/auth');
+      return;
+    }
+
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    const items = cart.map((i) => ({
+      product_id: Number(i.id),
+      quantity: i.quantity,
+      size: i.selectedSize || null,
+      color: i.selectedColor || null,
+      price: i.price,
+      product_name: i.name,
+      product_image: i.images?.[0] || null,
+    }));
+
+    try {
+      const { data, error } = await supabase.rpc('create_order', {
+        p_user_id: user?.id || null,
+        p_customer_name: formData.name,
+        p_customer_email: user?.email || '',
+        p_customer_phone: formData.phone,
+        p_address: formData.address,
+        p_neighborhood: formData.neighborhood,
+        p_city: formData.city,
+        p_payment_method: formData.paymentMethod,
+        p_items: items,
+      });
+
+      if (error) throw error;
+
+      if (!data || Number(data) <= 0) {
+        throw new Error('Não foi possível registar o pedido.');
+      }
+
       setLoading(false);
       toast.success('Pedido realizado com sucesso!', {
         duration: 5000,
@@ -54,7 +91,15 @@ const Checkout = () => {
       });
       clearCart();
       navigate('/');
-    }, 2500);
+    } catch (err) {
+      setLoading(false);
+      const message = err?.message || 'Não foi possível concluir o pedido.';
+      if (message.includes('security')) {
+        toast.error('Erro de permissão. Faça login novamente.');
+      } else {
+        toast.error(message);
+      }
+    }
   };
 
   const nextStep = () => {

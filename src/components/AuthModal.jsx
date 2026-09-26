@@ -45,7 +45,7 @@ const AuthModal = ({ isOpen, onClose }) => {
               <button 
                 onClick={() => {
                   onClose();
-                  navigate('/admin/login'); // Or a customer login page if created
+                  navigate('/auth');
                 }}
                 className="w-full bg-primary hover:bg-accent text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center space-x-3 shadow-lg shadow-primary/20"
               >
@@ -56,7 +56,7 @@ const AuthModal = ({ isOpen, onClose }) => {
               <button 
                 onClick={() => {
                   onClose();
-                  navigate('/admin/register'); // Or a customer register page
+                  navigate('/auth?tab=register');
                 }}
                 className="w-full bg-secondary text-primary font-bold py-4 rounded-2xl hover:bg-primary/10 transition-all border-2 border-transparent hover:border-primary/20"
               >

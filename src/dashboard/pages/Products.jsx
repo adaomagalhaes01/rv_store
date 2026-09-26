@@ -18,6 +18,7 @@ import {
   UploadCloud
 } from 'lucide-react';
 import useAdminStore from '../stores/useAdminStore';
+import { uploadImage } from '../../lib/storage';
 import toast from 'react-hot-toast';
 
 const Products = () => {
@@ -34,11 +35,11 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [newProduct, setNewProduct] = useState({
-    name: '', category: 'Femininas', price: '', stock: '', image: '',
+    name: '', category: 'Feminino', price: '', stock: '', image: '',
     description: '', sizes: { S: 0, M: 0, L: 0, XL: 0 }, discountCoupon: '', colors: ''
   });
 
-  const categories = ['Todas', 'Femininas', 'Masculinas', 'Cosméticos', 'Calçados'];
+  const categories = ['Todas', 'Feminino', 'Masculino', 'Cosméticos', 'Calçados', 'Acessórios'];
 
   const getSizeOptions = (category) => {
     if (category === 'Calçados') return ['37', '38', '39', '40', '41', '42', '43', '44'];
@@ -46,20 +47,24 @@ const Products = () => {
     return ['S', 'M', 'L', 'XL'];
   };
 
-  const handleImageChange = (e, isEdit = false) => {
+  const handleImageChange = async (e, isEdit = false) => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
         toast.error('Por favor, selecione apenas arquivos de imagem.');
         return;
       }
-      const imageUrl = URL.createObjectURL(file);
-      if (isEdit) {
-        setSelectedProduct({ ...selectedProduct, image: imageUrl });
-      } else {
-        setNewProduct({ ...newProduct, image: imageUrl });
+      try {
+        const url = await uploadImage(file, 'products');
+        if (isEdit) {
+          setSelectedProduct({ ...selectedProduct, image: url });
+        } else {
+          setNewProduct({ ...newProduct, image: url });
+        }
+        toast.success('Imagem carregada com sucesso!');
+      } catch {
+        toast.error('Não foi possível carregar a imagem.');
       }
-      toast.success('Imagem carregada com sucesso!');
     }
   };
 
@@ -69,36 +74,48 @@ const Products = () => {
     return matchSearch && matchCategory;
   });
 
-  const handleAddProduct = (e) => {
+  const handleAddProduct = async (e) => {
     e.preventDefault();
     if (!newProduct.name || !newProduct.price) {
       toast.error('Preencha os campos obrigatórios.');
       return;
     }
-    addProduct({
+    const { ok, error } = await addProduct({
       ...newProduct,
       price: Number(newProduct.price),
       stock: Number(newProduct.stock),
-      image: newProduct.image || '/assets/perfume-1.png'
+      image: newProduct.image || null
     });
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível adicionar o produto.');
+      return;
+    }
     setIsModalOpen(false);
-    setNewProduct({ name: '', category: 'Femininas', price: '', stock: '', image: '', description: '', sizes: { S: 0, M: 0, L: 0, XL: 0 }, discountCoupon: '', colors: '' });
+    setNewProduct({ name: '', category: 'Feminino', price: '', stock: '', image: '', description: '', sizes: { S: 0, M: 0, L: 0, XL: 0 }, discountCoupon: '', colors: '' });
     toast.success('Produto adicionado com sucesso!');
   };
 
-  const handleEditProduct = (e) => {
+  const handleEditProduct = async (e) => {
     e.preventDefault();
-    updateProduct(selectedProduct.id, {
+    const { ok, error } = await updateProduct(selectedProduct.id, {
       ...selectedProduct,
       price: Number(selectedProduct.price),
       stock: Number(selectedProduct.stock)
     });
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível atualizar o produto.');
+      return;
+    }
     setIsEditModalOpen(false);
     toast.success('Produto atualizado com sucesso!');
   };
 
-  const confirmDelete = () => {
-    deleteProduct(selectedProduct.id);
+  const confirmDelete = async () => {
+    const { ok, error } = await deleteProduct(selectedProduct.id);
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível remover o produto.');
+      return;
+    }
     setIsDeleteModalOpen(false);
     toast.success('Produto removido.');
   };

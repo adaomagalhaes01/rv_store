@@ -2,22 +2,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import productsData from '../data/products.json';
+import { searchProducts } from '../lib/products';
 
 const SearchModal = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
 
   useEffect(() => {
+    let cancelled = false;
     if (query.trim().length > 1) {
-      const filtered = productsData.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 5);
-      setResults(filtered);
+      searchProducts(query.trim())
+        .then((filtered) => {
+          if (!cancelled) setResults(filtered.slice(0, 5));
+        })
+        .catch(() => {
+          if (!cancelled) setResults([]);
+        });
     } else {
       setResults([]);
     }
+    return () => { cancelled = true; };
   }, [query]);
 
   return (

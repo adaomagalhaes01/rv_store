@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -19,9 +19,11 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
+import useAdminStore from '../stores/useAdminStore';
 import toast from 'react-hot-toast';
 
 const Users = () => {
+  const { users, loadUsers, addUser, updateUser, deleteUser } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -35,51 +37,52 @@ const Users = () => {
     role: 'Cliente',
     status: 'Ativo'
   });
-  
-  // Mock users data
-  const [users, setUsers] = useState([
-    { id: 1, name: 'Ana Silva', email: 'ana.silva@example.com', phone: '923 000 111', role: 'Cliente', joined: '2026-01-15', status: 'Ativo' },
-    { id: 2, name: 'Carlos Bento', email: 'carlos.b@example.com', phone: '912 333 444', role: 'Cliente', joined: '2026-02-10', status: 'Ativo' },
-    { id: 3, name: 'Maria Joana', email: 'm.joana@example.com', phone: '944 555 666', role: 'Admin', joined: '2025-11-20', status: 'Ativo' },
-    { id: 4, name: 'João Paulo', email: 'jp.lima@example.com', phone: '933 222 111', role: 'Cliente', joined: '2026-03-05', status: 'Suspenso' },
-    { id: 5, name: 'Beatriz Costa', email: 'bea.costa@example.com', phone: '922 888 777', role: 'Cliente', joined: '2026-04-12', status: 'Ativo' },
-  ]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const filteredUsers = users.filter(u => 
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddUser = (e) => {
+  const handleAddUser = async (e) => {
     e.preventDefault();
     if (!newUser.name || !newUser.email) {
       toast.error('Preencha os campos obrigatórios.');
       return;
     }
     
-    const userToAdd = {
-      ...newUser,
-      id: users.length + 1,
-      joined: new Date().toISOString().split('T')[0]
-    };
-    
-    setUsers([userToAdd, ...users]);
+    const { ok, error } = await addUser(newUser);
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível criar o usuário.');
+      return;
+    }
     setIsModalOpen(false);
     setNewUser({ name: '', email: '', phone: '', role: 'Cliente', status: 'Ativo' });
-    toast.success('Usuário adicionado com sucesso!');
+    toast.success('Conta criada! O utilizador já pode entrar.');
   };
 
-  const handleEditUser = (e) => {
+  const handleEditUser = async (e) => {
     e.preventDefault();
-    setUsers(users.map(u => u.id === selectedUser.id ? selectedUser : u));
+    const { ok, error } = await updateUser(selectedUser.id, selectedUser);
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível atualizar o usuário.');
+      return;
+    }
     setIsEditModalOpen(false);
     toast.success('Usuário atualizado com sucesso!');
   };
 
-  const confirmDelete = () => {
-    setUsers(users.filter(u => u.id !== selectedUser.id));
+  const confirmDelete = async () => {
+    const { ok, error } = await deleteUser(selectedUser.id);
+    if (!ok) {
+      toast.error(error?.message || 'Não foi possível remover o usuário.');
+      return;
+    }
     setIsDeleteModalOpen(false);
-    toast.success(`Usuário ${selectedUser.name} removido.`);
+    toast.success(`Usuário ${selectedUser.name} suspenso.`);
   };
 
   const openEditModal = (user) => {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, ShoppingBag, Heart, Truck, ShieldCheck, ArrowLeft, Plus, Minus, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import productsData from '../data/products.json';
+import { fetchProduct, fetchByCategory } from '../lib/products';
 import useCartStore from '../context/useCartStore';
 import toast from 'react-hot-toast';
 import ProductCard from '../components/ProductCard';
@@ -10,6 +10,7 @@ import ProductCard from '../components/ProductCard';
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -17,13 +18,29 @@ const ProductDetails = () => {
   const { addToCart } = useCartStore();
 
   useEffect(() => {
-    const found = productsData.find(p => p.id === parseInt(id));
-    if (found) {
-      setProduct(found);
-      if (found.sizes.length > 0) setSelectedSize(found.sizes[0]);
-      if (found.colors.length > 0) setSelectedColor(found.colors[0]);
-    }
+    let cancelled = false;
     window.scrollTo(0, 0);
+    setProduct(null);
+
+    const run = async () => {
+      try {
+        const p = await fetchProduct(id);
+        if (cancelled || !p) return;
+        setProduct(p);
+        setActiveImage(0);
+        setQuantity(1);
+        if (p.sizes.length > 0) setSelectedSize(p.sizes[0]);
+        if (p.colors.length > 0) setSelectedColor(p.colors[0]);
+
+        const related = await fetchByCategory(p.category).catch(() => []);
+        if (!cancelled) setRelatedProducts(related.filter(r => Number(r.id) !== Number(p.id)).slice(0, 4));
+      } catch {
+        if (!cancelled) setProduct(null);
+      }
+    };
+
+    run();
+    return () => { cancelled = true; };
   }, [id]);
 
   const handleAddToCart = () => {
@@ -37,10 +54,6 @@ const ProductDetails = () => {
       },
     });
   };
-
-  const relatedProducts = productsData
-    .filter(p => p.category === product?.category && p.id !== product?.id)
-    .slice(0, 4);
 
   if (!product) return (
     <div className="h-screen flex items-center justify-center">

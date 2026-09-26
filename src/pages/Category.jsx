@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Filter, ChevronDown, SlidersHorizontal, Grid, List } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import SkeletonProduct from '../components/SkeletonProduct';
-import productsData from '../data/products.json';
+import { fetchByCategory } from '../lib/products';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Category = () => {
@@ -16,32 +16,40 @@ const Category = () => {
   const [priceRange, setPriceRange] = useState([0, 100000]);
 
   useEffect(() => {
-    let filtered = productsData;
-    if (id && id !== 'todos') {
-      filtered = productsData.filter(p => p.category.toLowerCase() === id.toLowerCase());
-      setCategoryName(id.charAt(0).toUpperCase() + id.slice(1));
-    } else {
-      setCategoryName('Todos os Produtos');
-    }
-    
-    // Sort logic
-    if (sortBy === 'price-low') {
-      filtered = [...filtered].sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-high') {
-      filtered = [...filtered].sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'rating') {
-      filtered = [...filtered].sort((a, b) => b.rating - a.rating);
-    }
-
-    setProducts(filtered);
-    
-    // Simulate loading delay for better UX
+    let cancelled = false;
     setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 800);
-    
-    return () => clearTimeout(timer);
+
+    const run = async () => {
+      try {
+        let filtered = await fetchByCategory(id);
+
+        if (id && id !== 'todos') {
+          setCategoryName(id.charAt(0).toUpperCase() + id.slice(1));
+        } else {
+          setCategoryName('Todos os Produtos');
+        }
+
+        if (sortBy === 'price-low') {
+          filtered = [...filtered].sort((a, b) => a.price - b.price);
+        } else if (sortBy === 'price-high') {
+          filtered = [...filtered].sort((a, b) => b.price - a.price);
+        } else if (sortBy === 'rating') {
+          filtered = [...filtered].sort((a, b) => b.rating - a.rating);
+        }
+
+        if (!cancelled) setProducts(filtered);
+      } catch {
+        if (!cancelled) setProducts([]);
+      }
+
+      setTimeout(() => {
+        if (!cancelled) setLoading(false);
+      }, 500);
+    };
+
+    run();
+
+    return () => { cancelled = true; };
   }, [id, sortBy]);
 
   return (

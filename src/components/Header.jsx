@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, ShoppingBag, User, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useCartStore from '../context/useCartStore';
 import useUserStore from '../context/useUserStore';
@@ -11,7 +11,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { toggleCart, getCartCount } = useCartStore();
-  const { isAuthenticated, user } = useUserStore();
+  const { isAuthenticated, user, logout } = useUserStore();
   const location = useLocation();
 
   useEffect(() => {
@@ -84,15 +84,28 @@ const Header = () => {
             </Link>
 
             {isAuthenticated ? (
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-secondary rounded-full border border-primary/10">
-                <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-[10px] font-bold">
-                  {user?.name?.charAt(0) || 'U'}
-                </div>
-                <span className="hidden lg:block text-[11px] font-bold text-neutral-dark">{user.name}</span>
+              <div className="flex items-center space-x-2">
+                <Link
+                  to={user?.role === 'admin' ? '/admin' : '/auth'}
+                  className="flex items-center space-x-2 px-3 py-1.5 bg-secondary rounded-full border border-primary/10 hover:border-primary/40 transition-colors"
+                  title={user?.name}
+                >
+                  <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-[10px] font-bold">
+                    {user?.name?.charAt(0) || 'U'}
+                  </div>
+                  <span className="hidden lg:block text-[11px] font-bold text-neutral-dark">{user?.name}</span>
+                </Link>
+                <button
+                  onClick={logout}
+                  className="p-2 text-neutral-dark/60 hover:text-red-500 transition-colors"
+                  title="Sair"
+                >
+                  <LogOut size={18} />
+                </button>
               </div>
             ) : (
               <Link 
-                to="/admin/login" 
+                to="/auth" 
                 className="p-2 text-neutral-dark/80 hover:text-primary transition-colors duration-300"
                 title="Entrar"
               >
