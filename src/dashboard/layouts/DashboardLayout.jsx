@@ -8,7 +8,7 @@ import useAdminStore from '../stores/useAdminStore';
 const DashboardLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { isAuthenticated, user, loadProducts, loadOrders, loadStats, loadUsers, loadBanners } = useAdminStore();
+  const { isAuthenticated, user, adminNotifications, loadProducts, loadOrders, loadStats, loadUsers, loadBanners, loadAdminNotifications } = useAdminStore();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -17,15 +17,18 @@ const DashboardLayout = () => {
       loadStats();
       loadUsers();
       loadBanners();
+      loadAdminNotifications();
     }
   }, [isAuthenticated]);
 
-  const notifications = [
-    { id: 1, text: 'Novo pedido recebido de Maria Silva', type: 'order', time: '5 min atrás', icon: ShoppingCart, color: '#ff4d6d' },
-    { id: 2, text: 'Estoque baixo: Perfume de Rosas (3 unid.)', type: 'stock', time: '1 hora atrás', icon: Package, color: '#f97316' },
-    { id: 3, text: 'Novo cliente registrado: João Paulo', type: 'user', time: '3 horas atrás', icon: Users, color: '#7c3aed' },
-    { id: 4, text: 'Pagamento confirmado: Pedido #ORD-001', type: 'payment', time: '5 horas atrás', icon: CheckCircle2, color: '#059669' },
-  ];
+  // Icons map for notifications
+  const Icons = {
+    ShoppingCart,
+    Package,
+    Users,
+    CheckCircle2,
+    FileText: CheckCircle2 // using CheckCircle2 as fallback for FileText if not imported
+  };
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
@@ -65,7 +68,7 @@ const DashboardLayout = () => {
                 className="p-2.5 hover:bg-gray-50 rounded-xl transition-all relative"
               >
                 <Bell size={20} className="text-gray-500" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-white"></span>
+                {(adminNotifications?.length > 0) && <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-white"></span>}
               </button>
 
               <AnimatePresence>
@@ -83,20 +86,25 @@ const DashboardLayout = () => {
                         <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
                       </div>
                       <div className="max-h-[400px] overflow-y-auto">
-                        {notifications.map(n => (
-                          <div key={n.id} className="p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer flex space-x-3">
-                            <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center text-white" style={{ backgroundColor: n.color }}>
-                              <n.icon size={18} />
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold text-gray-700 leading-tight mb-1">{n.text}</p>
-                              <div className="flex items-center text-[10px] text-gray-400">
-                                <Clock size={10} className="mr-1" />
-                                <span>{n.time}</span>
+                        {!adminNotifications?.length ? (
+                          <div className="p-6 text-center text-gray-400 text-sm">Sem notificações</div>
+                        ) : adminNotifications.map(n => {
+                          const IconComp = Icons[n.iconName] || Bell;
+                          return (
+                            <div key={n.id} className="p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer flex space-x-3">
+                              <div className="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center text-white" style={{ backgroundColor: n.color }}>
+                                <IconComp size={18} />
+                              </div>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-700 leading-tight mb-1">{n.text}</p>
+                                <div className="flex items-center text-[10px] text-gray-400">
+                                  <Clock size={10} className="mr-1" />
+                                  <span>{n.time}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                       <button className="w-full py-3 text-xs font-bold text-primary hover:bg-primary/5 transition-colors border-t border-gray-50">
                         Ver todas as notificações

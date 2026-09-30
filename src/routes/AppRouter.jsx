@@ -10,6 +10,7 @@ import Contact from '../pages/Contact';
 import Promotions from '../pages/Promotions';
 import Auth from '../pages/Auth';
 import NotFound from '../pages/NotFound';
+import MyOrders from '../pages/MyOrders';
 
 // Dashboard imports
 import DashboardLayout from '../dashboard/layouts/DashboardLayout';
@@ -21,6 +22,7 @@ import Orders from '../dashboard/pages/Orders';
 import Users from '../dashboard/pages/Users';
 import Banners from '../dashboard/pages/Banners';
 import Settings from '../dashboard/pages/Settings';
+import Inventory from '../dashboard/pages/Inventory';
 
 import useUserStore from '../context/useUserStore';
 
@@ -36,9 +38,13 @@ const AppRouter = () => {
           <Route path="category/:id" element={<Category />} />
           <Route path="product/:id" element={<ProductDetails />} />
           <Route path="cart" element={<Cart />} />
-          <Route 
-            path="checkout" 
-            element={isAuthenticated ? <Checkout /> : <Navigate to="/" replace />} 
+          <Route
+            path="checkout"
+            element={isAuthenticated ? <Checkout /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="orders"
+            element={isAuthenticated ? <MyOrders /> : <Navigate to="/auth" replace />}
           />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
@@ -56,6 +62,7 @@ const AppRouter = () => {
           <Route path="orders" element={<Orders />} />
           <Route path="users" element={<Users />} />
           <Route path="banners" element={<Banners />} />
+          <Route path="inventory" element={<Inventory />} />
           <Route path="settings" element={<Settings />} />
         </Route>
 

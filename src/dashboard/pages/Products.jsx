@@ -210,7 +210,7 @@ const Products = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
                       <div className="w-11 h-14 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                        <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-700">{product.name}</p>
@@ -439,7 +439,7 @@ const Products = () => {
                     {newProduct.image ? (
                       <div className="flex items-center space-x-2 w-full px-4">
                         <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-primary/20">
-                          <img src={newProduct.image} alt="" className="w-full h-full object-cover" />
+                          <img src={newProduct.image} alt="" className="w-full h-full object-contain" />
                         </div>
                         <span className="text-[10px] text-primary font-bold uppercase truncate">Imagem Carregada</span>
                         <X 
@@ -631,7 +631,7 @@ const Products = () => {
                     className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl p-3 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-all"
                   >
                     <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 shrink-0">
-                      <img src={selectedProduct.image} alt="" className="w-full h-full object-cover" />
+                      <img src={selectedProduct.image} alt="" className="w-full h-full object-contain" />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-xs text-gray-600 font-bold">Trocar Imagem</span>
@@ -682,7 +682,7 @@ const Products = () => {
             >
               {/* Product Image Section */}
               <div className="w-full md:w-1/2 h-64 md:h-auto bg-gray-50 relative">
-                <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
+                <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-contain" />
                 <button 
                   onClick={() => setIsViewModalOpen(false)}
                   className="absolute top-4 left-4 p-2 bg-white/80 backdrop-blur-md rounded-full text-gray-800 shadow-lg md:hidden"

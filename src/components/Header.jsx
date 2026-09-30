@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
+import { Search, ShoppingBag, User, Menu, X, LayoutDashboard, LogOut, Bell, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useCartStore from '../context/useCartStore';
 import useUserStore from '../context/useUserStore';
 import SearchModal from './SearchModal';
+import { supabase } from '../lib/supabase';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const { toggleCart, getCartCount } = useCartStore();
   const { isAuthenticated, user, logout } = useUserStore();
   const location = useLocation();
@@ -25,6 +27,29 @@ const Header = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
+
+  // Carregar notificações não lidas para clientes
+  useEffect(() => {
+    if (!isAuthenticated || !user) { setUnreadNotifications(0); return; }
+    const loadUnread = async () => {
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+      setUnreadNotifications(count || 0);
+    };
+    loadUnread();
+    // Subscrever a novas notificações em tempo real
+    const channel = supabase
+      .channel('notifications-header')
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'notifications',
+        filter: `user_id=eq.${user.id}`,
+      }, () => loadUnread())
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [isAuthenticated, user?.id]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -85,15 +110,30 @@ const Header = () => {
 
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
+                {/* Minhas Encomendas — só para clientes (não admin) */}
+                {user?.role !== 'admin' && (
+                  <Link
+                    to="/orders"
+                    className="hidden md:flex items-center space-x-1.5 p-2 text-neutral-dark/80 hover:text-primary transition-colors duration-300 relative"
+                    title="Minhas Encomendas"
+                  >
+                    <Package size={20} />
+                    {unreadNotifications > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                        {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                      </span>
+                    )}
+                  </Link>
+                )}
                 <Link
-                  to={user?.role === 'admin' ? '/admin' : '/auth'}
+                  to={user?.role === 'admin' ? '/admin' : '/orders'}
                   className="flex items-center space-x-2 px-3 py-1.5 bg-secondary rounded-full border border-primary/10 hover:border-primary/40 transition-colors"
-                  title={user?.name}
+                  title={user?.full_name || user?.name}
                 >
                   <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-[10px] font-bold">
-                    {user?.name?.charAt(0) || 'U'}
+                    {(user?.full_name || user?.name)?.charAt(0) || 'U'}
                   </div>
-                  <span className="hidden lg:block text-[11px] font-bold text-neutral-dark">{user?.name}</span>
+                  <span className="hidden lg:block text-[11px] font-bold text-neutral-dark">{user?.full_name || user?.name}</span>
                 </Link>
                 <button
                   onClick={logout}

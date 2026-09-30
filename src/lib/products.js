@@ -69,7 +69,7 @@ export async function fetchOnSale() {
 export async function fetchByCategory(category) {
   let query = supabase.from('products').select(FIELDS);
   if (category && category !== 'todos') {
-    query = query.eq('category', category);
+    query = query.ilike('category', category);
   }
   const { data, error } = await query.order('id');
   if (error) throw error;

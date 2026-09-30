@@ -28,31 +28,31 @@ const ProductCard = ({ product }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link to={`/product/${product.id}`} className="block overflow-hidden rounded-xl bg-neutral-light relative aspect-[3/4]">
+      <Link to={`/product/${product.id}`} className="block overflow-hidden rounded-xl bg-white relative aspect-square p-2 border border-neutral-light/50">
         {/* Badges */}
-        <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
           {product.onSale && (
-            <span className="bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full">
+            <span className="bg-primary text-white text-[9px] font-bold px-2 py-1 rounded-md">
               PROMO
             </span>
           )}
           {product.isFeatured && (
-            <span className="bg-neutral-dark text-white text-[10px] font-bold px-3 py-1 rounded-full">
+            <span className="bg-neutral-dark text-white text-[9px] font-bold px-2 py-1 rounded-md">
               NOVO
             </span>
           )}
         </div>
 
         {/* Favorite Button */}
-        <button className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/80 backdrop-blur-md text-neutral-dark hover:text-primary transition-colors shadow-sm opacity-0 group-hover:opacity-100 transform translate-y-[-10px] group-hover:translate-y-0 duration-300">
-          <Heart size={16} />
+        <button className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 backdrop-blur-md text-neutral-dark hover:text-primary transition-colors shadow-sm opacity-0 group-hover:opacity-100 transform translate-y-[-10px] group-hover:translate-y-0 duration-300">
+          <Heart size={14} />
         </button>
 
         {/* Product Image */}
         <img 
           src={product.images[0]} 
           alt={product.name} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" 
         />
 
         {/* Quick Add Button */}

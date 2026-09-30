@@ -8,7 +8,9 @@ import {
   Settings, 
   LogOut,
   X,
-  HelpCircle
+  HelpCircle,
+  BarChart2,
+  ClipboardList,
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useAdminStore from '../stores/useAdminStore';
@@ -19,11 +21,12 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { logout, stats } = useAdminStore();
 
   const mainMenu = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
-    { icon: ShoppingBag, label: 'Produtos', path: '/admin/products', badge: stats.activeProducts },
-    { icon: Package, label: 'Pedidos', path: '/admin/orders', badge: stats.pendingOrders },
-    { icon: Users, label: 'Usuários', path: '/admin/users' },
-    { icon: ImageIcon, label: 'Banners', path: '/admin/banners' },
+    { icon: LayoutDashboard, label: 'Dashboard',  path: '/admin' },
+    { icon: ShoppingBag,    label: 'Produtos',    path: '/admin/products', badge: stats.activeProducts },
+    { icon: Package,        label: 'Pedidos',     path: '/admin/orders',   badge: stats.pendingOrders },
+    { icon: BarChart2,      label: 'Inventário',  path: '/admin/inventory', badge: stats.lowStockProducts || null },
+    { icon: Users,          label: 'Usuários',    path: '/admin/users' },
+    { icon: ImageIcon,      label: 'Banners',     path: '/admin/banners' },
   ];
 
   const bottomMenu = [
