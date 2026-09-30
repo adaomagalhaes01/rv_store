@@ -1,11 +1,10 @@
-
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 import { ArrowRight, ShoppingBag, Truck, ShieldCheck, Zap, Mail, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { fetchFeatured, fetchOnSale } from '../lib/products';
+import { fetchFeatured, fetchOnSale, fetchBanners, fetchCategories } from '../lib/products';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -17,13 +16,22 @@ import 'swiper/css/effect-fade';
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [promotionProducts, setPromotionProducts] = useState([]);
+  const [banners, setBanners] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     let active = true;
-    Promise.all([fetchFeatured(4).catch(() => []), fetchOnSale().catch(() => [])]).then(([featured, sale]) => {
+    Promise.all([
+      fetchFeatured(4).catch(() => []), 
+      fetchOnSale().catch(() => []),
+      fetchBanners().catch(() => []),
+      fetchCategories().catch(() => [])
+    ]).then(([featured, sale, fetchedBanners, fetchedCategories]) => {
       if (!active) return;
       setFeaturedProducts(featured.slice(0, 4));
       setPromotionProducts(sale.slice(0, 4));
+      setBanners(fetchedBanners);
+      setCategories(fetchedCategories);
     });
     return () => { active = false; };
   }, []);
@@ -47,94 +55,97 @@ const Home = () => {
     e.target.reset();
   };
 
-  const categories = [
+  const defaultCategories = [
     { name: 'Masculino', image: '/assets/camisa-azul-1.png', path: '/category/masculino' },
     { name: 'Feminino', image: '/assets/vestido-rosa-1.png', path: '/category/feminino' },
     { name: 'Cosméticos', image: '/assets/perfume-1.png', path: '/category/cosmeticos' },
     { name: 'Calçados', image: '/assets/tenis-1.png', path: '/category/calcados' },
   ];
 
+  const displayCategories = categories.length > 0 
+    ? categories.map(c => ({ name: c.name, image: c.image_url || '/assets/perfume-1.png', path: `/category/${c.slug}` }))
+    : defaultCategories;
+
   return (
     <div className="pb-20">
       {/* Hero Section */}
       <section className="relative h-[90vh] min-h-[600px] overflow-hidden bg-neutral-light">
-        <Swiper
-          modules={[Autoplay, Pagination, EffectFade]}
-          effect="fade"
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 6000 }}
-          className="h-full"
-        >
-          <SwiperSlide>
-            <div className="relative h-full w-full flex items-center justify-center">
-              <div 
-                className="absolute inset-0 w-full h-full"
-              >
-                <img 
-                  src="/assets/vestido-rosa-1.png" 
-                  className="w-full h-full object-cover" 
-                  alt="Banner 1"
-                />
-              </div>
-              <div className="absolute inset-0 bg-white/10" />
-              <div className="container relative h-full flex flex-col justify-center items-center text-center text-neutral-dark">
-                <span 
-                  className="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-primary text-primary bg-primary/10"
-                >
-                  Coleção Exclusiva
-                </span>
-                <h1 
-                  className="text-5xl md:text-8xl font-medium leading-tight mb-6 max-w-4xl"
-                >
-                  A Nova Era da <span className="text-primary italic font-light">Elegância.</span>
-                </h1>
-                <p 
-                  className="text-lg text-neutral-dark/60 mb-8 max-w-lg"
-                >
-                  Descubra peças únicas que definem o seu estilo. Qualidade premium com curadoria exclusiva RV_Store.
-                </p>
-                <div>
-                  <Link to="/category/feminino" className="btn-primary flex items-center space-x-2 rounded-[2px]">
-                    <span>Explorar Agora</span>
-                    <ArrowRight size={18} />
-                  </Link>
+        {banners.length > 0 ? (
+          <Swiper
+            modules={[Autoplay, Pagination, EffectFade]}
+            effect="fade"
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 6000 }}
+            className="h-full"
+          >
+            {banners.map((banner) => (
+              <SwiperSlide key={banner.id}>
+                <div className="relative h-full w-full flex items-center justify-center">
+                  <div className="absolute inset-0 w-full h-full">
+                    <img 
+                      src={banner.image_url} 
+                      className="w-full h-full object-cover" 
+                      alt={banner.title}
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-black/30" />
+                  <div className="container relative h-full flex flex-col justify-center items-center text-center text-white">
+                    {banner.subtitle && (
+                      <span className="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-white/50 bg-white/10">
+                        {banner.subtitle}
+                      </span>
+                    )}
+                    <h1 className="text-5xl md:text-8xl font-medium leading-tight mb-6 max-w-4xl drop-shadow-lg">
+                      {banner.title}
+                    </h1>
+                    {banner.link && (
+                      <div>
+                        <Link to={banner.link} className="btn-primary flex items-center space-x-2 rounded-[2px] bg-white text-black hover:bg-neutral-light">
+                          <span>Ver Mais</span>
+                          <ArrowRight size={18} />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        ) : (
+          <Swiper
+            modules={[Autoplay, Pagination, EffectFade]}
+            effect="fade"
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 6000 }}
+            className="h-full"
+          >
+            <SwiperSlide>
+              <div className="relative h-full w-full flex items-center justify-center">
+                <div className="absolute inset-0 w-full h-full">
+                  <img src="/assets/vestido-rosa-1.png" className="w-full h-full object-cover" alt="Banner 1" />
+                </div>
+                <div className="absolute inset-0 bg-white/10" />
+                <div className="container relative h-full flex flex-col justify-center items-center text-center text-neutral-dark">
+                  <span className="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-primary text-primary bg-primary/10">
+                    Coleção Exclusiva
+                  </span>
+                  <h1 className="text-5xl md:text-8xl font-medium leading-tight mb-6 max-w-4xl">
+                    A Nova Era da <span className="text-primary italic font-light">Elegância.</span>
+                  </h1>
+                  <p className="text-lg text-neutral-dark/60 mb-8 max-w-lg">
+                    Descubra peças únicas que definem o seu estilo. Qualidade premium com curadoria exclusiva RV_Store.
+                  </p>
+                  <div>
+                    <Link to="/category/feminino" className="btn-primary flex items-center space-x-2 rounded-[2px]">
+                      <span>Explorar Agora</span>
+                      <ArrowRight size={18} />
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative h-full w-full flex items-center justify-center">
-              <div 
-                className="absolute inset-0 w-full h-full"
-              >
-                <img 
-                  src="/assets/camisa-azul-1.png" 
-                  className="w-full h-full object-cover" 
-                  alt="Banner 2"
-                />
-              </div>
-              <div className="absolute inset-0 bg-white/10" />
-              <div className="container relative h-full flex flex-col justify-center items-center text-center text-neutral-dark">
-                <span 
-                  className="px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-primary text-primary bg-primary/10"
-                >
-                  Essentials
-                </span>
-                <h1 
-                  className="text-5xl md:text-8xl font-medium leading-tight mb-6 max-w-4xl"
-                >
-                  Estilo que <span className="text-primary italic font-light">Inspira.</span>
-                </h1>
-                <div>
-                  <Link to="/category/masculino" className="btn-primary flex items-center space-x-2 rounded-[2px]">
-                    <span>Ver Coleção</span>
-                    <ArrowRight size={18} />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </SwiperSlide>
-        </Swiper>
+            </SwiperSlide>
+          </Swiper>
+        )}
       </section>
 
       {/* Features */}
@@ -174,21 +185,21 @@ const Home = () => {
             </Link>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((cat, idx) => (
+            {displayCategories.map((cat, idx) => (
               <div
                 key={idx}
-                className="group relative h-80 rounded-2xl overflow-hidden bg-neutral-light cursor-pointer shadow-sm"
+                className="group relative aspect-square rounded-2xl overflow-hidden bg-white border border-neutral-light/50 cursor-pointer shadow-sm flex flex-col items-center justify-center p-6"
               >
                 <img 
                   src={cat.image} 
                   alt={cat.name} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" 
                 />
-                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  <div className="bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-sm">
-                    <h3 className="text-lg font-bold text-neutral-dark">{cat.name}</h3>
-                    <Link to={cat.path} className="text-primary text-xs font-bold flex items-center space-x-1 mt-1">
+                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors pointer-events-none" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <div className="bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-sm flex flex-col items-center text-center">
+                    <h3 className="text-sm md:text-base font-bold text-neutral-dark">{cat.name}</h3>
+                    <Link to={cat.path} className="text-primary text-[10px] uppercase font-bold flex items-center space-x-1 mt-1">
                       <span>Ver Tudo</span>
                       <ArrowRight size={12} />
                     </Link>

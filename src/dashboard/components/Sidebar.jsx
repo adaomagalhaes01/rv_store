@@ -11,6 +11,8 @@ import {
   HelpCircle,
   BarChart2,
   ClipboardList,
+  Grid,
+  Tag,
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useAdminStore from '../stores/useAdminStore';
@@ -27,6 +29,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: BarChart2,      label: 'Inventário',  path: '/admin/inventory', badge: stats.lowStockProducts || null },
     { icon: Users,          label: 'Usuários',    path: '/admin/users' },
     { icon: ImageIcon,      label: 'Banners',     path: '/admin/banners' },
+    { icon: Grid,           label: 'Categorias',  path: '/admin/categories' },
+    { icon: Tag,            label: 'Promoções',   path: '/admin/promotions', badge: stats.onSaleProducts || null },
   ];
 
   const bottomMenu = [

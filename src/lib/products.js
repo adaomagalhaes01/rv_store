@@ -101,7 +101,17 @@ export async function searchProducts(query) {
 export async function fetchBanners() {
   const { data, error } = await supabase
     .from('banners')
-    .select('id,title,subtitle,link,image_url:image,active,position')
+    .select('id,title,subtitle,link,image_url,active,position')
+    .eq('active', true)
+    .order('position');
+  if (error) throw error;
+  return data || [];
+}
+
+export async function fetchCategories() {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id,name,slug,image_url,description')
     .eq('active', true)
     .order('position');
   if (error) throw error;

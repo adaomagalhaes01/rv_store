@@ -21,6 +21,8 @@ import Products from '../dashboard/pages/Products';
 import Orders from '../dashboard/pages/Orders';
 import Users from '../dashboard/pages/Users';
 import Banners from '../dashboard/pages/Banners';
+import Categories from '../dashboard/pages/Categories';
+import AdminPromotions from '../dashboard/pages/Promotions';
 import Settings from '../dashboard/pages/Settings';
 import Inventory from '../dashboard/pages/Inventory';
 
@@ -62,6 +64,8 @@ const AppRouter = () => {
           <Route path="orders" element={<Orders />} />
           <Route path="users" element={<Users />} />
           <Route path="banners" element={<Banners />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="promotions" element={<AdminPromotions />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="settings" element={<Settings />} />
         </Route>

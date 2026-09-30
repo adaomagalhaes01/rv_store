@@ -20,6 +20,8 @@ const mapProduct = (p) => ({
   sizes: p.size_stock || {},
   discountCoupon: p.discount_coupon || '',
   colors: Array.isArray(p.colors) ? p.colors.join(', ') : p.colors || '',
+  onSale: Boolean(p.on_sale),
+  isFeatured: Boolean(p.is_featured),
 });
 
 const mapUser = (u) => ({
@@ -38,6 +40,7 @@ const mapBanner = (b) => ({
   subtitle: b.subtitle || '',
   link: b.link || '',
   image: b.image_url || '',
+  image_url: b.image_url || '',
   active: b.active,
 });
 
@@ -230,7 +233,7 @@ const useAdminStore = create((set, get) => ({
       sizes: Object.keys(product.sizes || {}),
       size_stock: product.sizes || {},
       discount_coupon: product.discountCoupon || null,
-      is_featured: true,
+      is_featured: product.isFeatured || false,
       on_sale: product.onSale || false,
       active: true,
     });
@@ -254,6 +257,8 @@ const useAdminStore = create((set, get) => ({
         sizes: Object.keys(product.sizes || {}),
         size_stock: product.sizes || {},
         discount_coupon: product.discountCoupon || null,
+        is_featured: product.isFeatured || false,
+        on_sale: product.onSale || false,
       })
       .eq('id', Number(id));
     if (error) return { ok: false, error: { message: error.message } };
@@ -438,6 +443,65 @@ const useAdminStore = create((set, get) => ({
       .eq('id', Number(id));
     if (error) return { ok: false, error: { message: error.message } };
     await get().loadBanners();
+    return { ok: true, error: null };
+  },
+
+  // ─── CATEGORIAS ────────────────────────────────────────────────
+  categories: [],
+  
+  loadCategories: async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('position');
+    if (error) return;
+    set({ categories: data || [] });
+  },
+
+  addCategory: async (category) => {
+    const { error } = await supabase.from('categories').insert({
+      name: category.name,
+      slug: category.slug,
+      description: category.description,
+      image_url: category.image_url,
+      active: category.active,
+      position: 0,
+    });
+    if (error) return { ok: false, error: { message: error.message } };
+    await get().loadCategories();
+    return { ok: true, error: null };
+  },
+
+  updateCategory: async (id, category) => {
+    const { error } = await supabase
+      .from('categories')
+      .update({
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        image_url: category.image_url,
+        active: category.active,
+      })
+      .eq('id', Number(id));
+    if (error) return { ok: false, error: { message: error.message } };
+    await get().loadCategories();
+    return { ok: true, error: null };
+  },
+
+  deleteCategory: async (id) => {
+    const { error } = await supabase.from('categories').delete().eq('id', Number(id));
+    if (error) return { ok: false, error: { message: error.message } };
+    await get().loadCategories();
+    return { ok: true, error: null };
+  },
+
+  toggleCategory: async (id, active) => {
+    const { error } = await supabase
+      .from('categories')
+      .update({ active: !active })
+      .eq('id', Number(id));
+    if (error) return { ok: false, error: { message: error.message } };
+    await get().loadCategories();
     return { ok: true, error: null };
   },
 

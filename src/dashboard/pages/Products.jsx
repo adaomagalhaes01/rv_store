@@ -131,7 +131,9 @@ const Products = () => {
       description: product.description || '',
       sizes: product.sizes || { S: 0, M: 0, L: 0, XL: 0 },
       discountCoupon: product.discountCoupon || '',
-      colors: product.colors || ''
+      colors: product.colors || '',
+      onSale: product.onSale || false,
+      isFeatured: product.isFeatured || false,
     });
     setIsEditModalOpen(true);
   };
@@ -219,9 +221,21 @@ const Products = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-xs font-medium px-3 py-1.5 bg-primary/10 text-primary rounded-lg">
-                      {product.category}
-                    </span>
+                    <div className="flex flex-col items-start gap-1">
+                      <span className="text-xs font-medium px-3 py-1 bg-primary/10 text-primary rounded-lg">
+                        {product.category}
+                      </span>
+                      {product.onSale && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-700 rounded-md">
+                          Em Oferta
+                        </span>
+                      )}
+                      {product.isFeatured && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-100 text-purple-700 rounded-md">
+                          Destaque
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm font-bold text-gray-700">
@@ -411,6 +425,36 @@ const Products = () => {
                       className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none uppercase"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="onSale"
+                      checked={newProduct.onSale || false} 
+                      onChange={(e) => setNewProduct({...newProduct, onSale: e.target.checked})}
+                      className="w-4 h-4 rounded text-primary focus:ring-primary/20"
+                    />
+                    <label htmlFor="onSale" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                      Em Promoção (Oferta)
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="isFeatured"
+                      checked={newProduct.isFeatured || false} 
+                      onChange={(e) => setNewProduct({...newProduct, isFeatured: e.target.checked})}
+                      className="w-4 h-4 rounded text-primary focus:ring-primary/20"
+                    />
+                    <label htmlFor="isFeatured" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                      Em Destaque (Estrela)
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-500">Estoque Total</label>
                     <input 
@@ -606,6 +650,36 @@ const Products = () => {
                       className="w-full bg-[#f8f9fc] border border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none uppercase"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="editOnSale"
+                      checked={selectedProduct.onSale || false} 
+                      onChange={(e) => setSelectedProduct({...selectedProduct, onSale: e.target.checked})}
+                      className="w-4 h-4 rounded text-primary focus:ring-primary/20"
+                    />
+                    <label htmlFor="editOnSale" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                      Em Promoção (Oferta)
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="editIsFeatured"
+                      checked={selectedProduct.isFeatured || false} 
+                      onChange={(e) => setSelectedProduct({...selectedProduct, isFeatured: e.target.checked})}
+                      className="w-4 h-4 rounded text-primary focus:ring-primary/20"
+                    />
+                    <label htmlFor="editIsFeatured" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                      Em Destaque (Estrela)
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-gray-500">Estoque Total</label>
                     <input 
